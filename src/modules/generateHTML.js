@@ -1,83 +1,85 @@
 export default function generateHTML () {
-    let body = document.getElementsByTagName('body')[0];
+    const body = document.getElementsByTagName('body')[0];
 
-    let mainContainer = createElem('div', 'container');
+    const mainContainer = createElem('div', 'container');
     body.appendChild(mainContainer);
 
-    let startPage = createElem('div', 'start-page', 'start-block');
+    const startPage = createElem('div', 'start-page', 'start-block');
     mainContainer.appendChild(startPage);
 
-    let logoImg = document.createElement('img');
-    logoImg.src = './assets/logo.png';
-    startPage.appendChild(logoImg);
+    const startLogo= createElem('div', 'logo-block', 'logo-block');
+    startPage.appendChild(startLogo);
 
-    let _searchInput = document.createElement('input');
-    _searchInput.type = 'text';
-    _searchInput.id = 'search-input';
-    startPage.appendChild(_searchInput);
+    const logoImg = createElem('img', 'start-logo');
+    logoImg.src = './assets/logo.png';
+    startLogo.appendChild(logoImg);
+
+    const startSearch = createElem('div', 'search-block');
+    startPage.appendChild(startSearch);
+
+    const searchInputWrapper = createElem('div', 'search-input-wrapper');
+    startSearch.appendChild(searchInputWrapper);
+
+    const startInput = createElem('input', 'start-input', 'search-input');
+    startInput.type = 'text';
+    searchInputWrapper.appendChild(startInput);
 
     // RESULT PAGE
 
-    let _resultPage = createElem('div', 'result-page', 'result');
-    mainContainer.appendChild(_resultPage);
+    const resultPage = createElem('div', 'result-page', 'result');
+    mainContainer.appendChild(resultPage);
 
-    let resultPageSearch = createElem('div', 'result-search', 'result-search');
-    _resultPage.appendChild(resultPageSearch);
+    const resultSearch = createElem('div', 'result-search', 'result-search');
+    resultPage.appendChild(resultSearch);
 
-    let resultPageLogo = document.createElement('img');
-    resultPageLogo.id = 'result-logo';
-    resultPageLogo.src = './assets/logo.png';
-    resultPageSearch.appendChild(resultPageLogo);
+    const resultLogo = createElem('img', 'result-logo', 'result-logo');
+    resultLogo.src = './assets/logo.png';
+    resultSearch.appendChild(resultLogo);
 
-    let resultInput = document.createElement('input');
+    const searchWrapper = createElem('div', 'result-input-wrapper');
+    resultSearch.appendChild(searchWrapper);
+
+    const resultInput = createElem('input', 'result-input', 'result-input');
     resultInput.type = 'text';
-    resultInput.id = 'result-input';
-    resultPageSearch.appendChild(resultInput);
+    searchWrapper.appendChild(resultInput);
 
-    let items = createElem('div', 'items', 'items');
-    _resultPage.appendChild(items);
+    const items = createElem('div', 'items', 'items');
+    resultPage.appendChild(items);
 
-    let pagingBlock = document.createElement('div');
-    pagingBlock.className = 'paging-block';
-    _resultPage.appendChild(pagingBlock);
+    const pagingBlock = createElem('div', 'paging-block');
+    resultPage.appendChild(pagingBlock);
 
-    let pageCircle1 = document.createElement('div');
-    pageCircle1.className = 'page-circle page-disabled';
-    pageCircle1.id = 'prev-circle';
+    const pageCircle1 = createElem('div', 'page-circle page-disabled',
+        'prev-circle');
     pagingBlock.appendChild(pageCircle1);
 
-    let pageLink1 = document.createElement('a');
-    pageLink1.className = 'page-link';
+    const pageLink1 = createElem('a', 'page-link');
     pageLink1.href = '#';
     pageLink1.innerHTML = '&#10094;';
     pageCircle1.appendChild(pageLink1);
 
-    let pageCircle2 = document.createElement('div');
-    pageCircle2.className = 'page-circle page-active';
+    const pageCircle2 = createElem('div', 'page-circle page-active');
     pagingBlock.appendChild(pageCircle2);
 
-    let pageLink2 = document.createElement('a');
-    pageLink2.className = 'page-link';
-    pageLink2.id = 'curr-circle';
+    const pageLink2 = createElem('a', 'page-link', 'curr-circle');
     pageLink2.href = '#';
     pageLink2.innerHTML = '1';
     pageCircle2.appendChild(pageLink2);
 
-    let pageCircle3 = document.createElement('div');
-    pageCircle3.className = 'page-circle';
-    pageCircle3.id = 'next-circle';
+    const pageCircle3 = createElem('div', 'page-circle', 'next-circle');
     pagingBlock.appendChild(pageCircle3);
 
-    let pageLink3 = document.createElement('a');
-    pageLink3.className = 'page-link';
+    const pageLink3 = createElem('a', 'page-link');
     pageLink3.innerHTML = '&#10095;';
     pageLink3.href = '#';
     pageCircle3.appendChild(pageLink3);
 }
 
 function createElem (elem, _class, id) {
-    let element = document.createElement(elem);
+    const element = document.createElement(elem);
     element.className = _class;
-    element.id = id || null;
+    if (id) {
+        element.id = id;
+    }
     return element;
 }

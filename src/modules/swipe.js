@@ -1,16 +1,16 @@
-let touchStartCoords = {x: -1, y: -1};
-let touchEndCoords = {x: -1, y: -1};
+let touchStartCoords = { x: -1, y: -1 };
+let touchEndCoords = { x: -1, y: -1 };
 let direction = 'undefined';
-let minDistanceXAxis = 30;
-let maxDistanceYAxis = 30;
-let maxAllowedTime = 1000;
+const minDistanceXAxis = 30;
+const maxDistanceYAxis = 30;
+const maxAllowedTime = 1000;
 let startTime = 0;
 let elapsedTime = 0;
 
-export function swipeStart(e) {
+export function swipeStart (e) {
     e = e || window.event;
     e = ('changedTouches' in e) ? e.changedTouches[0] : e;
-    touchStartCoords = {x: e.pageX, y: e.pageY};
+    touchStartCoords = { x: e.pageX, y: e.pageY };
     startTime = new Date().getTime();
 }
 
@@ -32,19 +32,21 @@ export function swipeEnd (e, drawLeftSwipe, drawRightSwipe) {
             Math.abs(touchEndCoords.y) <= maxDistanceYAxis) {
             direction = (touchEndCoords.x < 0) ? 'left' : 'right';
             switch (direction) {
-                case 'left':
-                    drawLeftSwipe();
-                    break;
-                case 'right':
-                    drawRightSwipe();
-                    break;
+            case 'left':
+                drawLeftSwipe();
+                break;
+            case 'right':
+                drawRightSwipe();
+                break;
+            default:
+                break;
             }
         }
     }
 }
 
 export function addMultipleListeners (el, s, func) {
-    let events = s.split(' ');
+    const events = s.split(' ');
     for (let i = 0, len = events.length; i < len; i++) {
         el.addEventListener(events[i], func, false);
     }

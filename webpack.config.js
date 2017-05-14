@@ -2,7 +2,7 @@ let path = require('path');
 let webpack = require('webpack');
 let BrowserSyncPlugin = require('browser-sync-webpack-plugin');
 
-let definePlugin = new webpack.DefinePlugin({
+const definePlugin = new webpack.DefinePlugin({
     __DEV__: JSON.stringify(JSON.parse(process.env.BUILD_DEV || 'true'))
 });
 

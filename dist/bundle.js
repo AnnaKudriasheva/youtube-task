@@ -2929,7 +2929,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 var query = exports.query = void 0;
 
-window.onload = function () {
+window.onload = function main() {
     (0, _generateHTML2.default)();
 
     var searchInput = document.getElementById('search-input');
@@ -2938,7 +2938,7 @@ window.onload = function () {
     var resultPage = document.getElementById('result');
     var container = document.getElementsByClassName('container')[0];
     var itemsContainer = document.getElementById('items');
-    var targetElement = document.getElementsByClassName('result-page')[0];
+    var targetElement = document.getElementsByClassName('items')[0];
     var resultInput = document.getElementById('result-input');
     var prevPage = document.getElementById('prev-circle');
     var nextPage = document.getElementById('next-circle');
@@ -2967,6 +2967,7 @@ window.onload = function () {
             exports.query = query = resultPageInput.value;
             page = 1;
             currPage.innerHTML = page;
+            prevPage.classList.add('page-disabled');
             displayedItems = 0;
             shift = getElementsToDisplay();
             (0, _request.cleanCache)();
@@ -2974,8 +2975,10 @@ window.onload = function () {
         }
     });
 
-    window.addEventListener('resize', function (event) {
-        drawItems();
+    window.addEventListener('resize', function (e) {
+        if (query) {
+            drawItems();
+        }
     });
 
     var fillInfo = function fillInfo(i) {
@@ -2989,9 +2992,11 @@ window.onload = function () {
         createContentItem(itemInfo);
     };
 
-    var drawItems = function drawItems() {
+    var drawItems = function draw() {
         var count = getElementsToDisplay();
-        if (displayedItems < count) {
+        if (_request.cache.length === 0) {
+            resultNotFound();
+        } else if (displayedItems < count) {
             for (var i = displayedItems; i < count; i++) {
                 fillInfo(i);
             }
@@ -3004,13 +3009,13 @@ window.onload = function () {
         }
     };
 
-    var getElementsToDisplay = function getElementsToDisplay() {
+    var getElementsToDisplay = function getElements() {
         return Math.floor(container.offsetWidth / 200);
     };
 
     var shift = getElementsToDisplay();
 
-    var drawRightSwipe = function drawRightSwipe() {
+    var drawRightSwipe = function rightSwipe() {
         var count = getElementsToDisplay();
         if (shift - count * 2 > 0) {
             while (itemsContainer.firstChild) {
@@ -3023,7 +3028,7 @@ window.onload = function () {
             shift -= count;
         }
         if (page > 1) {
-            page--;
+            page -= 1;
             currPage.innerHTML = page;
         }
         if (page === 1) {
@@ -3031,7 +3036,7 @@ window.onload = function () {
         }
     };
 
-    var drawLeftSwipe = function drawLeftSwipe() {
+    var drawLeftSwipe = function leftSwipe() {
         var count = getElementsToDisplay();
         if (_request.cache[shift + count] === undefined) {
             (0, _request.resultRequest)(drawLeftSwipe);
@@ -3046,20 +3051,22 @@ window.onload = function () {
                 fillInfo(i);
             }
             shift += count;
-            page++;
+            page += 1;
             currPage.innerHTML = page;
             prevPage.classList.remove('page-disabled');
         }
     };
 
-    var numberWithSpaces = function numberWithSpaces(number) {
+    var numberWithSpaces = function createNumber(number) {
         var parts = number.toString().split('.');
         parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
         return parts.join('.');
     };
 
-    var createContentItem = function createContentItem(info) {
+    var createContentItem = function createItem(info) {
         var itemBlock = document.createElement('div');
+        itemBlock.className = 'item-block';
+
         var itemTitle = document.createElement('h5');
         itemTitle.class = 'item-title';
 
@@ -3092,7 +3099,6 @@ window.onload = function () {
         itemDescription.className = 'item-description';
         itemDescription.innerHTML = info.description;
 
-        itemBlock.className = 'item-block';
         itemBlock.appendChild(itemPreview);
         itemBlock.appendChild(itemTitle);
         itemBlock.appendChild(itemAuthor);
@@ -3102,18 +3108,23 @@ window.onload = function () {
         itemsContainer.appendChild(itemBlock);
     };
 
+    var resultNotFound = function notFound() {
+        itemsContainer.innerHTML = 'Sorry, information about \'' + query + '\' not found :(';
+        nextPage.classList.add('page-disabled');
+    };
+
     nextPage.addEventListener('click', function (e) {
-        drawLeftSwipe();
+        return drawLeftSwipe();
     });
 
     prevPage.addEventListener('click', function (e) {
-        drawRightSwipe();
+        return drawRightSwipe();
     });
 
     (0, _swipe.addMultipleListeners)(targetElement, 'mousedown touchstart', _swipe.swipeStart);
     (0, _swipe.addMultipleListeners)(targetElement, 'mousemove touchmove', _swipe.swipeMove);
     (0, _swipe.addMultipleListeners)(targetElement, 'mouseup touchend', function (e) {
-        (0, _swipe.swipeEnd)(e, drawLeftSwipe, drawRightSwipe);
+        return (0, _swipe.swipeEnd)(e, drawLeftSwipe, drawRightSwipe);
     });
 };
 
@@ -4042,7 +4053,7 @@ module.exports = g;
 
 __webpack_require__(/*! core-js/shim */ 299);
 
-__webpack_require__(/*! regenerator-runtime/runtime */ 301);
+__webpack_require__(/*! regenerator-runtime/runtime */ 300);
 
 __webpack_require__(/*! core-js/fn/regexp/escape */ 119);
 
@@ -4093,69 +4104,68 @@ function generateHTML() {
     var startPage = createElem('div', 'start-page', 'start-block');
     mainContainer.appendChild(startPage);
 
-    var logoImg = document.createElement('img');
-    logoImg.src = './assets/logo.png';
-    startPage.appendChild(logoImg);
+    var startLogo = createElem('div', 'logo-block', 'logo-block');
+    startPage.appendChild(startLogo);
 
-    var _searchInput = document.createElement('input');
-    _searchInput.type = 'text';
-    _searchInput.id = 'search-input';
-    startPage.appendChild(_searchInput);
+    var logoImg = createElem('img', 'start-logo');
+    logoImg.src = './assets/logo.png';
+    startLogo.appendChild(logoImg);
+
+    var startSearch = createElem('div', 'search-block');
+    startPage.appendChild(startSearch);
+
+    var searchInputWrapper = createElem('div', 'search-input-wrapper');
+    startSearch.appendChild(searchInputWrapper);
+
+    var startInput = createElem('input', 'start-input', 'search-input');
+    startInput.type = 'text';
+    searchInputWrapper.appendChild(startInput);
 
     // RESULT PAGE
 
-    var _resultPage = createElem('div', 'result-page', 'result');
-    mainContainer.appendChild(_resultPage);
+    var resultPage = createElem('div', 'result-page', 'result');
+    mainContainer.appendChild(resultPage);
 
-    var resultPageSearch = createElem('div', 'result-search', 'result-search');
-    _resultPage.appendChild(resultPageSearch);
+    var resultSearch = createElem('div', 'result-search', 'result-search');
+    resultPage.appendChild(resultSearch);
 
-    var resultPageLogo = document.createElement('img');
-    resultPageLogo.id = 'result-logo';
-    resultPageLogo.src = './assets/logo.png';
-    resultPageSearch.appendChild(resultPageLogo);
+    var resultLogo = createElem('img', 'result-logo', 'result-logo');
+    resultLogo.src = './assets/logo.png';
+    resultSearch.appendChild(resultLogo);
 
-    var resultInput = document.createElement('input');
+    var searchWrapper = createElem('div', 'result-input-wrapper');
+    resultSearch.appendChild(searchWrapper);
+
+    var resultInput = createElem('input', 'result-input', 'result-input');
     resultInput.type = 'text';
-    resultInput.id = 'result-input';
-    resultPageSearch.appendChild(resultInput);
+    searchWrapper.appendChild(resultInput);
 
     var items = createElem('div', 'items', 'items');
-    _resultPage.appendChild(items);
+    resultPage.appendChild(items);
 
-    var pagingBlock = document.createElement('div');
-    pagingBlock.className = 'paging-block';
-    _resultPage.appendChild(pagingBlock);
+    var pagingBlock = createElem('div', 'paging-block');
+    resultPage.appendChild(pagingBlock);
 
-    var pageCircle1 = document.createElement('div');
-    pageCircle1.className = 'page-circle page-disabled';
-    pageCircle1.id = 'prev-circle';
+    var pageCircle1 = createElem('div', 'page-circle page-disabled', 'prev-circle');
     pagingBlock.appendChild(pageCircle1);
 
-    var pageLink1 = document.createElement('a');
-    pageLink1.className = 'page-link';
+    var pageLink1 = createElem('a', 'page-link');
     pageLink1.href = '#';
     pageLink1.innerHTML = '&#10094;';
     pageCircle1.appendChild(pageLink1);
 
-    var pageCircle2 = document.createElement('div');
-    pageCircle2.className = 'page-circle page-active';
+    var pageCircle2 = createElem('div', 'page-circle page-active');
     pagingBlock.appendChild(pageCircle2);
 
-    var pageLink2 = document.createElement('a');
-    pageLink2.className = 'page-link';
-    pageLink2.id = 'curr-circle';
+    var pageLink2 = createElem('a', 'page-link', 'curr-circle');
     pageLink2.href = '#';
     pageLink2.innerHTML = '1';
     pageCircle2.appendChild(pageLink2);
 
-    var pageCircle3 = document.createElement('div');
-    pageCircle3.className = 'page-circle';
-    pageCircle3.id = 'next-circle';
+    var pageCircle3 = createElem('div', 'page-circle', 'next-circle');
     pagingBlock.appendChild(pageCircle3);
 
-    var pageLink3 = document.createElement('a');
-    pageLink3.className = 'page-link';
+    var pageLink3 = createElem('a', 'page-link');
     pageLink3.innerHTML = '&#10095;';
     pageLink3.href = '#';
     pageCircle3.appendChild(pageLink3);
@@ -4164,7 +4174,9 @@ function generateHTML() {
 function createElem(elem, _class, id) {
     var element = document.createElement(elem);
     element.className = _class;
-    element.id = id || null;
+    if (id) {
+        element.id = id;
+    }
     return element;
 }
 
@@ -4189,43 +4201,48 @@ exports.cleanCache = cleanCache;
 
 var _main = __webpack_require__(/*! ../main */ 85);
 
-var nextPageToken = exports.nextPageToken = null;
-var cache = exports.cache = [];
+var nextPageToken = null;
+var cache = [];
+
+exports.nextPageToken = nextPageToken;
+exports.cache = cache;
+
+
 var XHR = 'onload' in new XMLHttpRequest() ? XMLHttpRequest : XDomainRequest;
 var apiKey = 'AIzaSyAlMFARTLXCJpYkIf9N-Y5eD2s0JjRrdV4';
 
 function resultRequest(callback) {
     var xhr = new XHR();
 
-    xhr.open('GET', 'https://www.googleapis.com/youtube/v3/search?key=' + apiKey + '&type=video&part=snippet&maxResults' + '=15' + (!nextPageToken ? '' : '&pageToken=' + nextPageToken) + '&q=' + _main.query, true);
+    xhr.open('GET', 'https://www.googleapis.com/youtube/v3/search?key=' + apiKey + '&type=video&part=snippet&maxResults' + ('=15' + (!nextPageToken ? '' : '&pageToken=' + nextPageToken) + '&q=' + _main.query), true);
 
-    xhr.onload = function () {
+    xhr.onload = function load() {
         var result = JSON.parse(this.responseText);
-        console.log(result);
         exports.nextPageToken = nextPageToken = result.nextPageToken;
         if (result.items.length) {
             statisticsRequest(callback, result.items);
+        } else {
+            callback();
         }
     };
 
-    xhr.onerror = function () {
-        alert('Ошибка ' + this.status);
+    xhr.onerror = function error() {
+        alert('Error ' + this.status);
     };
 
     xhr.send();
 }
 
-var statisticsRequest = function statisticsRequest(callback, items) {
+var statisticsRequest = function getStatistic(callback, items) {
     var xhr = new XHR();
     var ids = [];
     for (var i = 0; i < items.length; i++) {
         ids.push(items[i].id.videoId);
     }
-    console.log('ids: ' + ids.join());
 
     xhr.open('GET', 'https://www.googleapis.com/youtube/v3/videos?key=' + apiKey + '&part=statistics&id=' + ids.join());
 
-    xhr.onload = function () {
+    xhr.onload = function load() {
         var result = JSON.parse(this.responseText);
         for (var _i = 0; _i < items.length; _i++) {
             var item = items[_i];
@@ -4235,8 +4252,8 @@ var statisticsRequest = function statisticsRequest(callback, items) {
         callback();
     };
 
-    xhr.onerror = function () {
-        alert('Ошибка ' + this.status);
+    xhr.onerror = function error() {
+        alert('\u041E\u0448\u0438\u0431\u043A\u0430 ' + this.status);
     };
 
     xhr.send();
@@ -4304,6 +4321,8 @@ function swipeEnd(e, drawLeftSwipe, drawRightSwipe) {
                     break;
                 case 'right':
                     drawRightSwipe();
+                    break;
+                default:
                     break;
             }
         }
@@ -9322,203 +9341,12 @@ module.exports = __webpack_require__(/*! ./modules/_core */ 24);
 /* 300 */
 /* unknown exports provided */
 /* all exports used */
-/*!******************************!*\
-  !*** ./~/process/browser.js ***!
-  \******************************/
-/***/ (function(module, exports) {
-
-// shim for using process in browser
-var process = module.exports = {};
-
-// cached from whatever global is present so that test runners that stub it
-// don't break things.  But we need to wrap it in a try catch in case it is
-// wrapped in strict mode code which doesn't define any globals.  It's inside a
-// function because try/catches deoptimize in certain engines.
-
-var cachedSetTimeout;
-var cachedClearTimeout;
-
-function defaultSetTimout() {
-    throw new Error('setTimeout has not been defined');
-}
-function defaultClearTimeout () {
-    throw new Error('clearTimeout has not been defined');
-}
-(function () {
-    try {
-        if (typeof setTimeout === 'function') {
-            cachedSetTimeout = setTimeout;
-        } else {
-            cachedSetTimeout = defaultSetTimout;
-        }
-    } catch (e) {
-        cachedSetTimeout = defaultSetTimout;
-    }
-    try {
-        if (typeof clearTimeout === 'function') {
-            cachedClearTimeout = clearTimeout;
-        } else {
-            cachedClearTimeout = defaultClearTimeout;
-        }
-    } catch (e) {
-        cachedClearTimeout = defaultClearTimeout;
-    }
-} ())
-function runTimeout(fun) {
-    if (cachedSetTimeout === setTimeout) {
-        //normal enviroments in sane situations
-        return setTimeout(fun, 0);
-    }
-    // if setTimeout wasn't available but was latter defined
-    if ((cachedSetTimeout === defaultSetTimout || !cachedSetTimeout) && setTimeout) {
-        cachedSetTimeout = setTimeout;
-        return setTimeout(fun, 0);
-    }
-    try {
-        // when when somebody has screwed with setTimeout but no I.E. maddness
-        return cachedSetTimeout(fun, 0);
-    } catch(e){
-        try {
-            // When we are in I.E. but the script has been evaled so I.E. doesn't trust the global object when called normally
-            return cachedSetTimeout.call(null, fun, 0);
-        } catch(e){
-            // same as above but when it's a version of I.E. that must have the global object for 'this', hopfully our context correct otherwise it will throw a global error
-            return cachedSetTimeout.call(this, fun, 0);
-        }
-    }
-
-
-}
-function runClearTimeout(marker) {
-    if (cachedClearTimeout === clearTimeout) {
-        //normal enviroments in sane situations
-        return clearTimeout(marker);
-    }
-    // if clearTimeout wasn't available but was latter defined
-    if ((cachedClearTimeout === defaultClearTimeout || !cachedClearTimeout) && clearTimeout) {
-        cachedClearTimeout = clearTimeout;
-        return clearTimeout(marker);
-    }
-    try {
-        // when when somebody has screwed with setTimeout but no I.E. maddness
-        return cachedClearTimeout(marker);
-    } catch (e){
-        try {
-            // When we are in I.E. but the script has been evaled so I.E. doesn't  trust the global object when called normally
-            return cachedClearTimeout.call(null, marker);
-        } catch (e){
-            // same as above but when it's a version of I.E. that must have the global object for 'this', hopfully our context correct otherwise it will throw a global error.
-            // Some versions of I.E. have different rules for clearTimeout vs setTimeout
-            return cachedClearTimeout.call(this, marker);
-        }
-    }
-
-
-
-}
-var queue = [];
-var draining = false;
-var currentQueue;
-var queueIndex = -1;
-
-function cleanUpNextTick() {
-    if (!draining || !currentQueue) {
-        return;
-    }
-    draining = false;
-    if (currentQueue.length) {
-        queue = currentQueue.concat(queue);
-    } else {
-        queueIndex = -1;
-    }
-    if (queue.length) {
-        drainQueue();
-    }
-}
-
-function drainQueue() {
-    if (draining) {
-        return;
-    }
-    var timeout = runTimeout(cleanUpNextTick);
-    draining = true;
-
-    var len = queue.length;
-    while(len) {
-        currentQueue = queue;
-        queue = [];
-        while (++queueIndex < len) {
-            if (currentQueue) {
-                currentQueue[queueIndex].run();
-            }
-        }
-        queueIndex = -1;
-        len = queue.length;
-    }
-    currentQueue = null;
-    draining = false;
-    runClearTimeout(timeout);
-}
-
-process.nextTick = function (fun) {
-    var args = new Array(arguments.length - 1);
-    if (arguments.length > 1) {
-        for (var i = 1; i < arguments.length; i++) {
-            args[i - 1] = arguments[i];
-        }
-    }
-    queue.push(new Item(fun, args));
-    if (queue.length === 1 && !draining) {
-        runTimeout(drainQueue);
-    }
-};
-
-// v8 likes predictible objects
-function Item(fun, array) {
-    this.fun = fun;
-    this.array = array;
-}
-Item.prototype.run = function () {
-    this.fun.apply(null, this.array);
-};
-process.title = 'browser';
-process.browser = true;
-process.env = {};
-process.argv = [];
-process.version = ''; // empty string to avoid regexp issues
-process.versions = {};
-
-function noop() {}
-
-process.on = noop;
-process.addListener = noop;
-process.once = noop;
-process.off = noop;
-process.removeListener = noop;
-process.removeAllListeners = noop;
-process.emit = noop;
-
-process.binding = function (name) {
-    throw new Error('process.binding is not supported');
-};
-
-process.cwd = function () { return '/' };
-process.chdir = function (dir) {
-    throw new Error('process.chdir is not supported');
-};
-process.umask = function() { return 0; };
-
-
-/***/ }),
-/* 301 */
-/* unknown exports provided */
-/* all exports used */
 /*!******************************************!*\
   !*** ./~/regenerator-runtime/runtime.js ***!
   \******************************************/
 /***/ (function(module, exports, __webpack_require__) {
 
-/* WEBPACK VAR INJECTION */(function(global, process) {/**
+/* WEBPACK VAR INJECTION */(function(global) {/**
  * Copyright (c) 2014, Facebook, Inc.
  * All rights reserved.
  *
@@ -9536,6 +9364,7 @@ process.umask = function() { return 0; };
   var undefined; // More compressible than void 0.
   var $Symbol = typeof Symbol === "function" ? Symbol : {};
   var iteratorSymbol = $Symbol.iterator || "@@iterator";
+  var asyncIteratorSymbol = $Symbol.asyncIterator || "@@asyncIterator";
   var toStringTagSymbol = $Symbol.toStringTag || "@@toStringTag";
 
   var inModule = typeof module === "object";
@@ -9709,8 +9538,8 @@ process.umask = function() { return 0; };
       }
     }
 
-    if (typeof process === "object" && process.domain) {
-      invoke = process.domain.bind(invoke);
+    if (typeof global.process === "object" && global.process.domain) {
+      invoke = global.process.domain.bind(invoke);
     }
 
     var previousPromise;
@@ -9749,6 +9578,9 @@ process.umask = function() { return 0; };
   }
 
   defineIteratorMethods(AsyncIterator.prototype);
+  AsyncIterator.prototype[asyncIteratorSymbol] = function () {
+    return this;
+  };
   runtime.AsyncIterator = AsyncIterator;
 
   // Note that simple async functions are implemented on top of
@@ -9931,6 +9763,15 @@ process.umask = function() { return 0; };
   defineIteratorMethods(Gp);
 
   Gp[toStringTagSymbol] = "Generator";
+
+  // A Generator should always return itself as the iterator object when the
+  // @@iterator function is called on it. Some browsers' implementations of the
+  // iterator prototype chain incorrectly implement this, causing the Generator
+  // object to not be returned from this call. This ensures that doesn't happen.
+  // See https://github.com/facebook/regenerator/issues/274 for more details.
+  Gp[iteratorSymbol] = function() {
+    return this;
+  };
 
   Gp.toString = function() {
     return "[object Generator]";
@@ -10242,10 +10083,10 @@ process.umask = function() { return 0; };
   typeof self === "object" ? self : this
 );
 
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(/*! ./../webpack/buildin/global.js */ 114), __webpack_require__(/*! ./../process/browser.js */ 300)))
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(/*! ./../webpack/buildin/global.js */ 114)))
 
 /***/ }),
-/* 302 */
+/* 301 */
 /* unknown exports provided */
 /* all exports used */
 /*!******************************************!*\
@@ -10254,9 +10095,9 @@ process.umask = function() { return 0; };
 /***/ (function(module, exports, __webpack_require__) {
 
 __webpack_require__(/*! babel-polyfill */115);
-module.exports = __webpack_require__(/*! /Users/anna_kudriasheva/Desktop/YouTube-task/src/main.js */85);
+module.exports = __webpack_require__(/*! /Users/anna_kudriasheva/Documents/Work/youtube-task/src/main.js */85);
 
 
 /***/ })
-],[302]);
+],[301]);
 //# sourceMappingURL=bundle.js.map

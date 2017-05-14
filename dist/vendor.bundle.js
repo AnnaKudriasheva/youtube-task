@@ -143,7 +143,7 @@
 /******/ 	__webpack_require__.o = function(object, property) { return Object.prototype.hasOwnProperty.call(object, property); };
 /******/
 /******/ 	// __webpack_public_path__
-/******/ 	__webpack_require__.p = "https://annakudriasheva.github.io/qwerty-pigeon-post/";
+/******/ 	__webpack_require__.p = "https://annakudriasheva.github.io/youtube-task/";
 /******/
 /******/ 	// on error function for async loading
 /******/ 	__webpack_require__.oe = function(err) { console.error(err); throw err; };
